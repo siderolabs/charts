@@ -1,0 +1,58 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: {{.Values.service.name}}
+  name: {{.Values.service.name}}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels:
+        app: {{.Values.service.name}}
+    spec:
+      serviceAccountName: {{ .Values.service.name }}
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      containers:
+      - image: autonomy/oidc-client:v0.1.0-alpha.4
+        name: oidc-client
+        imagePullPolicy: Always
+        args:
+          - --config
+          - /etc/oidc-client/oidc.yaml
+          - serve
+        ports:
+        - name: http
+          containerPort: {{.Values.service.port}}
+        volumeMounts:
+        - name: kubernetes-pki
+          mountPath: /etc/kubernetes/pki/ca.crt
+          readOnly: true
+        - name: oidc-client
+          mountPath: /etc/oidc-client
+          readOnly: true
+      volumes:
+      - name: kubernetes-pki
+        hostPath:
+          path: {{ default "/etc/kubernetes/pki/ca.crt" .Values.kubernetesCA }}
+      - name: oidc-client
+        projected:
+          sources:
+          - configMap:
+              name: oidc-config
+              items:
+              - key: oidc.yaml
+                path: oidc.yaml
+          - secret:
+              name: {{ required "A valid .Values.ingressSecretName entry is required!" .Values.ingressSecretName }}
+              items:
+              - key: tls.crt
+                path: tls.crt
+              - key: tls.key
+                path: tls.key

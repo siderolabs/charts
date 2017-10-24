@@ -1,0 +1,55 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: dex
+data:
+  config.yaml: |
+    issuer: https://{{ required "A valid .Values.ingressHost entry is required!" .Values.ingressHost }}/
+    storage:
+      type: kubernetes
+      config:
+        inCluster: true
+    web:
+      http: 0.0.0.0:{{ .Values.service.port }}
+      tlsCert: /etc/dex/tls.crt
+      tlsKey: /etc/dex/tls.key
+    oauth2:
+      skipApprovalScreen: true
+    connectors:
+    - type: ldap
+      id: ldap
+      name: LDAP
+      config:
+        # host and port of the LDAP server in form "host:port".
+        host: {{ required "A valid .Values.ldapHost entry is required!" .Values.ldapHost }}
+        # freeIPA server's CA
+        rootCA: /etc/dex/ipa-ca.crt
+        userSearch:
+          baseDN: {{ required "A valid .Values.userSearchBaseDN entry is required!" .Values.userSearchBaseDN }}
+          filter: "(objectClass=posixAccount)"
+          username: uid
+          idAttr: uid
+          emailAttr: mail
+          nameAttr: gecos
+        groupSearch:
+          baseDN: {{ required "A valid .Values.groupSearchBaseDN entry is required!" .Values.groupSearchBaseDN }}
+          filter: "(objectClass=posixGroup)"
+          userAttr: uid
+          groupAttr: memberUid
+          nameAttr: cn
+    expiry:
+      signingKeys: "6h"
+      idTokens: "24h"
+    staticClients:
+    - id: kubernetes
+      redirectURIs:
+      - https://{{ required "A valid .Values.callback entry is required!" .Values.callback }}/callback
+      name: Kubernetes
+      secret: {{ required "A valid .Values.clientSecret entry is required!" .Values.clientSecret }}
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ipa.ca
+data:
+  ipa-ca.crt: {{ required "A valid .Values.ipaCACrt entry is required!" .Values.ipaCACrt | quote }}

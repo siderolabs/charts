@@ -1,0 +1,17 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: oidc-config
+data:
+  oidc.yaml: |
+    listen: http://0.0.0.0:{{.Values.service.port}}
+    scopes:
+    - groups
+    api-secure-port: {{ default "6443" .Values.apiSecurePort }}
+    clusterName: {{ required "A valid .Values.clusterName entry required!" .Values.clusterName }}
+    issuer: https://{{ required "A valid .Values.issuer entry required!" .Values.issuer }}/
+    tlsCert: /etc/oidc-client/tls.crt
+    tlsKey: /etc/oidc-client/tls.key
+    client-id: kubernetes
+    client-secret: {{ required "A valid .Values.issuer entry required!" .Values.clientSecret }}
+    redirect-uri: https://{{required "A valid .Values.ingressHost entry required!" .Values.ingressHost}}/callback

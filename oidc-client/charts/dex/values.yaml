@@ -1,0 +1,5 @@
+replicaCount: 1
+service:
+  name: dex
+  type: ClusterIP
+  port: 8080

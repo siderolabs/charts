@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Values.service.name }}
+  name: {{ .Values.service.name }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels:
+        app: {{ .Values.service.name }}
+    spec:
+      serviceAccountName: {{ .Values.service.name }}
+      containers:
+      - image: quay.io/coreos/dex:v2.2.5
+        name: dex
+        command: ["/usr/local/bin/dex", "serve", "/etc/dex/config.yaml"]
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.port }}
+        volumeMounts:
+        - name: dex
+          mountPath: "/etc/dex"
+          readOnly: true
+      volumes:
+      - name: dex
+        projected:
+          sources:
+          - configMap:
+              name: dex
+              items:
+              - key: config.yaml
+                path: config.yaml
+          - configMap:
+              name: ipa.ca
+              items:
+                - key: ipa-ca.crt
+                  path: ipa-ca.crt
+          - secret:
+              name: {{ required "A valid .Values.ingressSecretName entry is required!" .Values.ingressSecretName }}
+              items:
+                - key: tls.crt
+                  path: tls.crt
+                - key: tls.key
+                  path: tls.key

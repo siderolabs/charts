@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.service.name }}
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .Values.service.name }}
+rules:
+  - apiGroups: ["oidc.coreos.com"] # API group created by dex
+    resources: ["*"]
+    verbs: ["*"]
+  - apiGroups: ["extensions"]
+    resources: ["thirdpartyresources"]
+    verbs: ["create"] # To manage its own resources identity must be able to create thirdpartyresources.
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .Values.service.name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.service.name }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ .Values.service.name }}
+  apiGroup: rbac.authorization.k8s.io

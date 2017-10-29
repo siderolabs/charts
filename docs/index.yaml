@@ -2,11 +2,11 @@ apiVersion: v1
 entries:
   oidc-client:
   - apiVersion: v1
-    created: 2017-10-28T22:56:49.994160534-07:00
+    created: 2017-10-28T23:07:26.537460533-07:00
     description: A Helm chart for Kubernetes
-    digest: 093abd1ef84b613dbb5f1e4832aa172708b7f0f198ff6a57917c7b318714fc92
+    digest: 09af7ee6f413b4e83d71ea80553ad7bc61e5874f6b66d00647a1fcd87c72777b
     name: oidc-client
     urls:
     - https://autonomy.github.io/charts/oidc-client-0.1.0.tgz
     version: 0.1.0
-generated: 2017-10-28T22:56:49.993634414-07:00
+generated: 2017-10-28T23:07:26.536952823-07:00

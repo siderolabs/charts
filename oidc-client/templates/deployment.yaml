@@ -20,7 +20,7 @@ spec:
       - key: node-role.kubernetes.io/master
         effect: NoSchedule
       containers:
-      - image: autonomy/oidc-client:v0.1.0-alpha.4
+      - image: autonomy/oidc-client:v0.1.0-alpha.5
         name: oidc-client
         imagePullPolicy: Always
         args:

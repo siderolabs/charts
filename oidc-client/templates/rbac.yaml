@@ -11,7 +11,7 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - nodes
+  - ingress
   verbs:
   - get
   - list

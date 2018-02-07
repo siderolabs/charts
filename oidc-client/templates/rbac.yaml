@@ -9,9 +9,9 @@ metadata:
   name: {{ .Values.service.name }}
 rules:
 - apiGroups:
-  - ""
+  - extensions
   resources:
-  - ingress
+  - ingresses
   verbs:
   - get
   - list
